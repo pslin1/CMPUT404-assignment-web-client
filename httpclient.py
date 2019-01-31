@@ -41,13 +41,17 @@ class HTTPClient(object):
         return None
 
     def get_code(self, data):
-        return None
+        split_data = data.split(" ")
+        #***IMPORTANT*** CODE MUST BE AN INT
+        return int(split_data[1])
 
     def get_headers(self,data):
         return None
 
     def get_body(self, data):
-        return None
+        #get stuff after \r\n\r\n
+        split_data = data.split("\r\n\r\n")
+        return split_data[1]
     
     def sendall(self, data):
         self.socket.sendall(data.encode('utf-8'))
@@ -67,9 +71,48 @@ class HTTPClient(object):
                 done = not part
         return buffer.decode('utf-8')
 
+    #do the get request and return the response from the server
+    #connect to socket first (self.connect(host, port) - given when httpclient.py is called?)
+    #build get request
+    #send get request (self.sendall(data))
+    #receive something from socket  (self.recvall(self.socket))
+    #   Note that recvall does the s.recv(BUFFER_SIZE) thing from lab 2
+    #parse output of recvall into code and body (self.get_code(), self.get(body))
+    #feed into HTTPResponse
     def GET(self, url, args=None):
-        code = 500
-        body = ""
+        #print("url is: " + url)
+        #print()
+        parsed_url = urllib.parse.urlparse(url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+        #print("host is: " + host)
+        #print("port is: " + str(port))
+        #remember to close this
+        self.connect(host, port)
+
+        #get path for building HTTP request
+        path = parsed_url.path
+
+        #Build GET request
+        request = "GET " + path + " HTTP/1.1\r\n"
+        request += "Host: " + host + "\r\n"
+        request += "Connection: close\r\n\r\n"
+
+        #send request
+        self.sendall(request)
+
+        #read what we received
+        received = self.recvall(self.socket)
+
+        #close socket
+        self.close()
+
+        #print("received is: " + received)
+        #print("the path is: " + path)
+        code = self.get_code(received)
+        #print("THE CODE IS: " + code)
+        body = self.get_body(received)
+        print("THE BODY IS: " + body)
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
