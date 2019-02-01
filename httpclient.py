@@ -96,6 +96,11 @@ class HTTPClient(object):
         #get path for building HTTP request
         path = parsed_url.path
 
+        #For some reason, the path is blank for slashdot and it returns a 400
+        #add / if path is blank somehow
+        if path == "":
+            path = "/"
+
         #NOTE FOR JAN 31: SLASHDOT DOES NOT LIKE THIS...WHY!?!?!?!
         #Build GET request
         request = "GET " + path + " HTTP/1.1\r\n"
