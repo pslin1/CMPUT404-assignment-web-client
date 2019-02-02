@@ -22,6 +22,7 @@ compatible) http://docs.python.org/2/library/socketserver.html
 
 Collaboraters: 
 Participants on class forum
+Austin Pennyfeather (Consulted about slashdot 400 error)
 
 External Source code used:
 https://docs.python.org/3/library/urllib.parse.html (How to use urllib.parse.urlparse)
