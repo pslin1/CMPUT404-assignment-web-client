@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# Copyright 2016 Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
+# Copyright 2016 Shu-Jun Pierre Lin, Abram Hindle, https://github.com/tywtyw2002, and https://github.com/treedust
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,6 +36,7 @@ class HTTPClient(object):
     #def get_host_port(self,url):
 
     def connect(self, host, port):
+        #if no port specified, default to 80
         if port == None:
             port = 80
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,14 +83,14 @@ class HTTPClient(object):
     #parse output of recvall into code and body (self.get_code(), self.get(body))
     #feed into HTTPResponse
     def GET(self, url, args=None):
-        #print("url is: " + url)
-        #print()
+
+        # Credit: https://docs.python.org/3/library/urllib.parse.html
+        # Date accessed: Jan 29, 2019
         parsed_url = urllib.parse.urlparse(url)
-        #print("Parsed url is: " + parsed_url.geturl())
+
         host = parsed_url.hostname
         port = parsed_url.port
-        #print("host is: " + host)
-        #print("port is: " + str(port))
+
         #remember to close this
         self.connect(host, port)
 
@@ -101,7 +102,6 @@ class HTTPClient(object):
         if path == "":
             path = "/"
 
-        #NOTE FOR JAN 31: SLASHDOT DOES NOT LIKE THIS...WHY!?!?!?!
         #Build GET request
         request = "GET " + path + " HTTP/1.1\r\n"
         request += "Host: " + host + "\r\n"
@@ -117,22 +117,20 @@ class HTTPClient(object):
         #close socket
         self.close()
 
-        #print("received is: " + received)
-        #print("the path is: " + path)
         code = self.get_code(received)
-        #print("THE CODE IS: " + code)
         body = self.get_body(received)
-        #print("THE BODY IS: " + body)
+
         return HTTPResponse(code, body)
 
     def POST(self, url, args=None):
 
+        # Credit: https://docs.python.org/3/library/urllib.parse.html
+        # Date accessed: Jan 29, 2019
         parsed_url = urllib.parse.urlparse(url)
-        #print("Parsed url is: " + parsed_url.geturl())
+
         host = parsed_url.hostname
         port = parsed_url.port
-        #print("host is: " + host)
-        #print("port is: " + str(port))
+
         #remember to close this
         self.connect(host, port)
 
@@ -141,7 +139,9 @@ class HTTPClient(object):
 
         #parse args
         if args:
+            # Credit: Daniel Roseman (https://stackoverflow.com/users/104349/daniel-roseman)
             #https://stackoverflow.com/questions/4163263/transferring-dictionary-via-post-request
+            # Date Accessed: Jan 31, 2019
             encoded_args = urllib.parse.urlencode(args)
             length = len(encoded_args)
         else:
@@ -149,10 +149,8 @@ class HTTPClient(object):
             length = 0
 
         #Build POST request
-        #CONTENT-LENGTH REQUIRED?
         request = "POST " + path + " HTTP/1.1\r\n"
         request += "Host: " + host + "\r\n"
-        #can content type be anything else?
         request += "Content-Type: application/x-www-form-urlencoded\r\n"
         request += "Content-Length: " + str(length) + "\r\n"
         request += "Accept-Language: en-us\r\n"
